@@ -1,0 +1,17 @@
+#!/bin/sh
+# dmenu xclip xdotool
+
+wordpath="$HOME/.config/dmenuquick"
+[ -f "$wordpath/chinese_words" ] || cp "$wordpath/chinese_words_list" "$wordpath/chinese_words"
+while :;do
+  selected=$(echo "$(cat $wordpath/chinese_basic $wordpath/chinese_punctuation $wordpath/chinese_words)" | dmenu -b -i)
+  [ "$selected" = '' ] && exit # Esc to escape
+
+  (echo -n "${selected%% *}" | xclip -f -selection clipbord | xclip) &&
+    xdotool key Shift+Insert &&
+    (grep "$selected" "$wordpath/chinese_basic" "$wordpath/chinese_punctuation" >/dev/null ||
+      (grep "$selected" "$wordpath/chinese_words" >/dev/null &&
+        echo "$selected\n$(grep -v "$selected" "$wordpath/chinese_words")" > "$wordpath/chinese_words"
+      )
+    )
+done
